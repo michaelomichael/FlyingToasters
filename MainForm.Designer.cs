@@ -45,22 +45,24 @@ namespace FlyingToasters
 			// 
 			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
 			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-			this.imageList1.Images.SetKeyName(0, "flyer1.gif");
-			this.imageList1.Images.SetKeyName(1, "flyer2.gif");
-			this.imageList1.Images.SetKeyName(2, "flyer3.gif");
-			this.imageList1.Images.SetKeyName(3, "flyer4.gif");
-			this.imageList1.Images.SetKeyName(4, "toast1.gif");
+			this.imageList1.Images.SetKeyName(0, "flyer2.png");
+			this.imageList1.Images.SetKeyName(1, "flyer3.png");
+			this.imageList1.Images.SetKeyName(2, "flyer4.png");
+			this.imageList1.Images.SetKeyName(3, "flyer1.png");
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.Color.Black;
+			this.BackColor = System.Drawing.Color.WhiteSmoke;
 			this.ClientSize = new System.Drawing.Size(284, 262);
+			this.DoubleBuffered = true;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+			this.KeyPreview = true;
 			this.Name = "MainForm";
 			this.Text = "FlyingToasters";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainFormKeyDown);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainFormMouseClick);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainFormMouseMove);
 			this.ResumeLayout(false);

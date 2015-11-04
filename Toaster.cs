@@ -16,12 +16,13 @@ namespace FlyingToasters
 	/// <summary>
 	/// Description of Toaster.
 	/// </summary>
-	public partial class Toaster : UserControl
+	public partial class Toaster : FlyingObject
 	{
 		private const int MAX_TOASTER_IMAGES = 4;
 		private int iImageIndex_i = 0;
 		private int iWingsDirection_i = 1;
-		private int iSpeed_i;
+		private int iTicksSinceLastAnimation_i = 0;
+		
 		private ImageList images_i;
 		
 		/// <summary>
@@ -29,7 +30,7 @@ namespace FlyingToasters
 		/// </summary>
 		/// <param name="images_p">Should have 4 images</param>
 		/// <param name="iSpeed_p">1 to 10</param>
-		public Toaster(ImageList images_p, int iSpeed_p)
+		public Toaster(ImageList images_p, int iSpeed_p) : base(iSpeed_p)
 		{
 			//
 			// The InitializeComponent() call is required for Windows Forms designer support.
@@ -37,59 +38,47 @@ namespace FlyingToasters
 			InitializeComponent();
 			
 			images_i = images_p;
-			iSpeed_i = iSpeed_p;
-			timer1.Interval = (500 / iSpeed_p);
-			timer1.Enabled = true;
-		}
-		
-		
-		public int Speed
-		{
-			get { return iSpeed_i; }
+			images_i.TransparentColor = Color.Transparent;
 		}
 		
 		
 		
-		private void Timer1Tick(object sender, EventArgs e)
+		
+		
+		protected override void Animate()
 		{
+			base.Animate();
 			AnimateWings();
-			Fly();
 		}
+		
 		
 		
 		private void AnimateWings()
 		{
-			iImageIndex_i = iImageIndex_i + iWingsDirection_i;
+			iTicksSinceLastAnimation_i = (iTicksSinceLastAnimation_i + 1) % 3;
 			
-			if (iImageIndex_i < 0)
-			{
-				iImageIndex_i = 1;
-				iWingsDirection_i = -iWingsDirection_i;
-			}
-			else if (iImageIndex_i >= MAX_TOASTER_IMAGES)
-			{
-				iImageIndex_i = MAX_TOASTER_IMAGES - 2;
-				iWingsDirection_i = -iWingsDirection_i;
-			}
-		
-			this.BackgroundImage = images_i.Images[iImageIndex_i];
+			if (0 == iTicksSinceLastAnimation_i)
+			{			
+				iImageIndex_i = iImageIndex_i + iWingsDirection_i;
+				
+				if (iImageIndex_i < 0)
+				{
+					iImageIndex_i = 1;
+					iWingsDirection_i = -iWingsDirection_i;
+				}
+				else if (iImageIndex_i >= MAX_TOASTER_IMAGES)
+				{
+					iImageIndex_i = MAX_TOASTER_IMAGES - 2;
+					iWingsDirection_i = -iWingsDirection_i;
+				}
+			
+				this.BackgroundImage = images_i.Images[iImageIndex_i];
+				this.BackColor = Color.Transparent;
+			}			
 		}
 		
 		
 		
-		private void Fly()
-		{
-			float fPixelsPerTick = 1.5F;
-			this.Left -= (int) (iSpeed_i * fPixelsPerTick);
-			this.Top += (int) (iSpeed_i * fPixelsPerTick);
-			
-			if (this.Left < -100  ||  this.Top > this.Parent.Height)
-			{
-				// Reset
-				int iDelta = Math.Max(this.Parent.Height, this.Parent.Width);
-				this.Left += iDelta;
-				this.Top -= iDelta;
-			}
-		}
+		
 	}
 }

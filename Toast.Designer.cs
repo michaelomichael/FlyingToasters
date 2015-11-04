@@ -2,13 +2,13 @@
  * Created by SharpDevelop.
  * User: Michael
  * Date: 04/11/2015
- * Time: 21:18
+ * Time: 22:03
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 namespace FlyingToasters
 {
-	partial class Toaster
+	partial class Toast
 	{
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.
@@ -36,15 +36,17 @@ namespace FlyingToasters
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Toast));
 			this.SuspendLayout();
 			// 
-			// Toaster
+			// Toast
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.Color.Transparent;
+			this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
 			this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-			this.Name = "Toaster";
+			this.DoubleBuffered = true;
+			this.Name = "Toast";
 			this.Size = new System.Drawing.Size(64, 64);
 			this.ResumeLayout(false);
 		}
