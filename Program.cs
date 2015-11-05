@@ -24,6 +24,32 @@ namespace FlyingToasters
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
+			
+			
+			if (args.Length > 0)
+			{
+				//MessageBox.Show("Args are " + args[0]);
+				if (args[0].StartsWith("/c"))
+				{
+					//
+					// Show configuration dialog
+					//
+					Application.Run(new ConfigForm());
+					return;
+				}
+				else if (args[0].Equals("/p"))
+				{
+					//
+					// Show a preview.
+					//
+					Application.Run(new MainForm(new IntPtr(long.Parse(args[1]))));
+					return;
+				}
+			}
+			
+			//
+			//  In all other cases (including the "/s" argument), just show full screen.
+			//
 			Application.Run(new MainForm());
 		}
 		

@@ -12,21 +12,40 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Windows.Forms;
 
 namespace FlyingToasters
 {
 	/// <summary>
-	/// Description of MainForm.
+	/// Draws the toasters.
 	/// </summary>
 	public partial class MainForm : Form
 	{
+		[DllImport("user32.dll")]
+		static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+		
+		[DllImport("user32.dll")]
+		static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+		
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+		
+		[DllImport("user32.dll")]
+		static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
+		
+
 		private Random rnd_i = new Random();
 		private const int NUM_TOASTERS = 10;
 		private const int NUM_TOASTS = 5;
 		private bool isCurrentlyAnimating_i = false;		
 		private List<FlyingObject> objects_i = new List<FlyingObject>();
+		private float fScreenScalingFactor_i = 1.0F;
+		private Rectangle virtualScreenBounds_i;
+		private Boolean isPreviewMode_i = false;
+		
+		
 		
 		public MainForm()
 		{
@@ -35,17 +54,104 @@ namespace FlyingToasters
 			//
 			InitializeComponent();
 			
-			
 			this.SetStyle(ControlStyles.UserPaint, true);
     		this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
     		this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-    
-    
+        		
+    		//
+			//  Make our form fill ALL of the available screens
 			//
-			// TODO: Add constructor code after the InitializeComponent() call.
-			//
+			Rectangle totalSize = GetAllScreensBounds();
+			this.Bounds = totalSize;
+			
+			SetVirtualScreenBounds();
+			
+    		Cursor.Hide();    		
 			CreateFlyingObjects();
 		}
+		
+		
+		
+		
+		/// <summary>
+		/// Alternative constructor that allows us to embed the screensaver in a preview
+		/// window.  Thanks to http://www.codeproject.com/Articles/31376/Making-a-C-screensaver
+		/// for the tips.
+		/// </summary>
+		/// <param name="hParentWnd_p">Window handle of the preview window</param>
+		public MainForm(IntPtr hParentWnd_p)
+		{
+			//
+			// The InitializeComponent() call is required for Windows Forms designer support.
+			//
+			InitializeComponent();
+			
+			isPreviewMode_i = true;
+			
+			//
+			//  Set the preview window as the parent of this one
+			//
+			SetParent(this.Handle, hParentWnd_p);
+			
+			//
+			//  Tell Windows that our form is a child window; this means that we'll
+			//  be closed automatically whenever the parent window closes.
+			//
+			SetWindowLong(this.Handle, -16, new IntPtr(GetWindowLong(this.Handle, -16) | 0x40000000));
+
+			//
+			//  Set the window size to be the same as that of the parent window
+			//
+			Rectangle parentBounds;
+		    GetClientRect(hParentWnd_p, out parentBounds);
+		    this.Size = parentBounds.Size;
+		    this.Location = new Point(0,0);
+		    
+		    fScreenScalingFactor_i = 10.0F;
+		    SetVirtualScreenBounds();
+		    
+			this.SetStyle(ControlStyles.UserPaint, true);
+    		this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+    		this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+        		
+    		Cursor.Hide();    		
+			CreateFlyingObjects();
+		}
+		
+		
+		
+		/// <summary>
+		/// Mark it as a WS_EX_TOOLWINDOW window, so the icon doesn't show up in Alt Tab
+		/// </summary>
+		protected override CreateParams CreateParams 
+		{
+			get 
+			{ 
+				CreateParams originalParams = base.CreateParams;
+				
+				if (isPreviewMode_i)
+				{
+					originalParams.ExStyle |= 0x08000000; // WS_EX_NOACTIVATE
+				}
+				
+				return originalParams;
+			}
+		} 
+	
+		
+		
+		/// <summary>
+		/// Creates a dummy screen rectangle that, in preview mode at least, is 
+		/// a scaled up version of the real window.  
+		/// </summary>
+		private void SetVirtualScreenBounds()
+		{
+			virtualScreenBounds_i = new Rectangle(this.Left,
+			                                      this.Top,
+												  (int) (this.Width * fScreenScalingFactor_i),
+												  (int) (this.Height * fScreenScalingFactor_i));
+		}
+		
 		
 		
 		
@@ -83,13 +189,7 @@ namespace FlyingToasters
 		
 		
 		private void CreateFlyingObjects()
-		{		
-			//
-			//  Make our form fill ALL of the available screens
-			//
-			Rectangle totalSize = GetAllScreensBounds();
-			this.Bounds = totalSize;
-			
+		{	
 			//
 			//  Add some toasters and toast
 			//
@@ -98,7 +198,7 @@ namespace FlyingToasters
 				int iSpeed = rnd_i.Next(1,10);
 				Bitmap gif = GetBitmapResource("toaster.gif");
 				Point pos = GetRandomStartingPosition();
-				FlyingObject o = new FlyingObject(gif, totalSize, pos.X, pos.Y, iSpeed);
+				FlyingObject o = new FlyingObject(gif, virtualScreenBounds_i, pos.X, pos.Y, iSpeed);
 				objects_i.Add(o);
 			}
 			
@@ -107,7 +207,7 @@ namespace FlyingToasters
 				int iSpeed = rnd_i.Next(1,10);
 				Bitmap gif = GetBitmapResource("toast.gif");
 				Point pos = GetRandomStartingPosition();
-				FlyingObject o = new FlyingObject(gif, totalSize, pos.X, pos.Y, iSpeed);
+				FlyingObject o = new FlyingObject(gif, virtualScreenBounds_i, pos.X, pos.Y, iSpeed);
 				objects_i.Add(o);
 				
 			}
@@ -118,8 +218,9 @@ namespace FlyingToasters
 		
 		private Point GetRandomStartingPosition()
 		{
-			return new Point(rnd_i.Next(0,this.Width + this.Height), rnd_i.Next(0,this.Height + 100));	
+			return new Point(rnd_i.Next(0,virtualScreenBounds_i.Width + virtualScreenBounds_i.Height), rnd_i.Next(0,virtualScreenBounds_i.Height + 100));	
 		}
+		
 		
 		
 		
@@ -180,22 +281,43 @@ namespace FlyingToasters
 		
 		
 		
+		/// <summary>
+		/// Triggered by the Invalidate() method, this is where we draw the toasters
+		/// and toast, and also trigger another 'AnimateImage' cycle.
+		/// </summary>
 		void MainFormPaint(object sender, PaintEventArgs e)
 		{			
 			AnimateImage();
 			
 			ImageAnimator.UpdateFrames();
 			
-			//
-			//  Scale the images up using retro chunky interpolation, not this
-			//  fancy new bicubic nonsense.
-			//
-			const int SCALE = 2;			
-			e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+			float fImageScalingFactor = 2 / fScreenScalingFactor_i;
+			
+			if (isPreviewMode_i)
+			{	
+				//
+				//  Scale down using a high quality interpolation, so you can make 
+				//  out what the tiny objects are.
+				//
+				e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			}
+			else
+			{
+				//
+				//  Scale the images up using retro chunky interpolation, not this
+				//  fancy new bicubic nonsense.
+				//
+				e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+			}
 			
 			foreach (FlyingObject o in objects_i)
 			{
-				e.Graphics.DrawImage(o.Gif, o.Left, o.Top, o.Gif.Width*SCALE, o.Gif.Height*SCALE);
+				//e.Graphics.DrawImage(o.Gif, o.Left, o.Top, o.Gif.Width*SCALE, o.Gif.Height*SCALE);
+				e.Graphics.DrawImage(o.Gif, 
+				                     o.Left / fScreenScalingFactor_i, 
+				                     o.Top / fScreenScalingFactor_i, 
+				                     o.Gif.Width*fImageScalingFactor, 
+				                     o.Gif.Height*fImageScalingFactor);
 			}
 		}
 		
@@ -225,5 +347,6 @@ namespace FlyingToasters
 			
 			this.Invalidate();	
 		}
+		
 	}
 }
