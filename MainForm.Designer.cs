@@ -37,23 +37,21 @@ namespace FlyingToasters
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-			this.timer1 = new System.Windows.Forms.Timer(this.components);
+			this.tmrAnimation = new System.Windows.Forms.Timer(this.components);
+			this.tmrTopMost = new System.Windows.Forms.Timer(this.components);
 			this.SuspendLayout();
 			// 
-			// imageList1
+			// tmrAnimation
 			// 
-			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-			this.imageList1.Images.SetKeyName(0, "output_GqptmW.gif");
-			this.imageList1.Images.SetKeyName(1, "toast1.gif");
+			this.tmrAnimation.Enabled = true;
+			this.tmrAnimation.Interval = 30;
+			this.tmrAnimation.Tick += new System.EventHandler(this.TmrAnimationTick);
 			// 
-			// timer1
+			// tmrTopMost
 			// 
-			this.timer1.Enabled = true;
-			this.timer1.Interval = 30;
-			this.timer1.Tick += new System.EventHandler(this.Timer1Tick);
+			this.tmrTopMost.Enabled = true;
+			this.tmrTopMost.Interval = 1000;
+			this.tmrTopMost.Tick += new System.EventHandler(this.TmrTopMostTick);
 			// 
 			// MainForm
 			// 
@@ -72,7 +70,7 @@ namespace FlyingToasters
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainFormMouseMove);
 			this.ResumeLayout(false);
 		}
-		private System.Windows.Forms.Timer timer1;
-		private System.Windows.Forms.ImageList imageList1;
+		private System.Windows.Forms.Timer tmrTopMost;
+		private System.Windows.Forms.Timer tmrAnimation;
 	}
 }

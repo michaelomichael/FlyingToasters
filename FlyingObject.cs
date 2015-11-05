@@ -39,7 +39,7 @@ namespace FlyingToasters
 		{
 			float fVerticalMovementProportion = 0.5F;
 			
-			int iPixelsPerTickX = (int) ((iSpeed_i * 0.75F) + 0);
+			int iPixelsPerTickX = (int) (((iSpeed_i+1) * 0.75F) + 0);
 			int iPixelsPerTickY = (int) (iPixelsPerTickX * fVerticalMovementProportion);
 			
 			iLeft_i -= iPixelsPerTickX;
