@@ -39,34 +39,40 @@ namespace FlyingToasters
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+			this.timer1 = new System.Windows.Forms.Timer(this.components);
 			this.SuspendLayout();
 			// 
 			// imageList1
 			// 
 			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
 			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-			this.imageList1.Images.SetKeyName(0, "flyer2.png");
-			this.imageList1.Images.SetKeyName(1, "flyer3.png");
-			this.imageList1.Images.SetKeyName(2, "flyer4.png");
-			this.imageList1.Images.SetKeyName(3, "flyer1.png");
+			this.imageList1.Images.SetKeyName(0, "output_GqptmW.gif");
+			this.imageList1.Images.SetKeyName(1, "toast1.gif");
+			// 
+			// timer1
+			// 
+			this.timer1.Enabled = true;
+			this.timer1.Interval = 30;
+			this.timer1.Tick += new System.EventHandler(this.Timer1Tick);
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.Color.WhiteSmoke;
+			this.BackColor = System.Drawing.Color.Black;
 			this.ClientSize = new System.Drawing.Size(284, 262);
 			this.DoubleBuffered = true;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 			this.KeyPreview = true;
 			this.Name = "MainForm";
 			this.Text = "FlyingToasters";
-			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+			this.Paint += new System.Windows.Forms.PaintEventHandler(this.MainFormPaint);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainFormKeyDown);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainFormMouseClick);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainFormMouseMove);
 			this.ResumeLayout(false);
 		}
+		private System.Windows.Forms.Timer timer1;
 		private System.Windows.Forms.ImageList imageList1;
 	}
 }

@@ -2,85 +2,73 @@
  * Created by SharpDevelop.
  * User: Michael
  * Date: 04/11/2015
- * Time: 21:56
+ * Time: 23:11
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.ComponentModel;
 using System.Drawing;
-using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace FlyingToasters
 {
 	/// <summary>
 	/// Description of FlyingObject.
 	/// </summary>
-	public partial class FlyingObject : UserControl
+	public class FlyingObject
 	{
-		protected int iSpeed_i;
+		private Bitmap gif_i;
+		private int iLeft_i;
+		private int iTop_i;
+		private int iSpeed_i;
+		private Rectangle screenBounds_i;
 		
-		public FlyingObject() : this(0)
-		{
-			
-		}
 		
-		public FlyingObject(int iSpeed_p)
+		
+		public FlyingObject(Bitmap gif_p, Rectangle screenBounds_p, int iInitialLeft_p, int iInitialTop_p, int iSpeed_p)
 		{
-			//
-			// The InitializeComponent() call is required for Windows Forms designer support.
-			//
-			InitializeComponent();
-			
+			gif_i = gif_p;
+			iLeft_i = iInitialLeft_p;
+			iTop_i = iInitialTop_p;
 			iSpeed_i = iSpeed_p;
-			
-			if (iSpeed_i > 0)
-			{
-				timer1.Interval = 50 + (200 / iSpeed_p);
-				timer1.Enabled = true;
-			}
+			screenBounds_i = screenBounds_p;
 		}
 		
 		
-		
-		public int Speed
+		public void Move()
 		{
-			get { return iSpeed_i; }
-		}
-		
-		
-		
-		
-		protected virtual void Animate()
-		{
-			Fly();
-		}
-		
-		
-		
-		protected void Fly()
-		{
+			float fVerticalMovementProportion = 0.5F;
 			
-			int iPixelsPerTickX = (int) (iSpeed_i * 1F) + 0;
-			int iPixelsPerTickY = (int) (iSpeed_i * 0.5F) + 0;
+			int iPixelsPerTickX = (int) ((iSpeed_i * 0.75F) + 0);
+			int iPixelsPerTickY = (int) (iPixelsPerTickX * fVerticalMovementProportion);
 			
-			this.Left -= iPixelsPerTickX;
-			this.Top += iPixelsPerTickY;
+			iLeft_i -= iPixelsPerTickX;
+			iTop_i += iPixelsPerTickY;
 			
-			if (this.Left < -100  ||  this.Top > this.Parent.Height)
+			if (iLeft_i < (screenBounds_i.Left - 100)  ||  this.Top > screenBounds_i.Bottom)
 			{
 				// Reset
-				int iDelta = Math.Max(this.Parent.Height, this.Parent.Width);
-				this.Left += iDelta;
-				this.Top -= iDelta;
+				Debug.WriteLine("Hello, resetting; Current (" + iLeft_i + "," + iTop_i + "), bounds = " + screenBounds_i);
+				int iDelta = Math.Max(screenBounds_i.Height, screenBounds_i.Width);
+				iLeft_i += iDelta;
+				iTop_i -= (int) (iDelta * fVerticalMovementProportion);
 			}
 		}
 		
+		public Bitmap Gif {
+			get { return gif_i; }
+		}
 		
-		
-		private void Timer1Tick(object sender, EventArgs e)
-		{
-			Animate();
+		public int Left {
+			get { return iLeft_i; }
+		}
+
+		public int Speed {
+			get { return iSpeed_i; }
+		}
+
+		public int Top {
+			get { return iTop_i; }
 		}
 	}
 }
